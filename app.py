@@ -5,7 +5,7 @@ from scraper import get_menu
 
 st.set_page_config(page_title="Zomato Menu Scraper", layout="wide")
 
-# 💅 Custom HTML & CSS
+# 💅 Custom CSS and Title
 st.markdown("""
     <style>
         body {
@@ -28,7 +28,7 @@ st.markdown("""
             margin-bottom: 30px;
         }
 
-        /* Input background and text */
+        /* Input box customization */
         .stTextInput>div>div>input {
             background-color: #ffffff;
             color: #000000 !important;
@@ -43,7 +43,7 @@ st.markdown("""
             border: 1px solid #444;
         }
 
-        /* Placeholder Styling */
+        /* Placeholder styling */
         input::placeholder {
             color: #666 !important;
             opacity: 1 !important;
@@ -51,6 +51,14 @@ st.markdown("""
 
         [data-theme="dark"] input::placeholder {
             color: #ccc !important;
+        }
+
+        /* Center-align label */
+        label[for="zomato-url-input"] {
+            display: block;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
         }
 
         /* Button styling */
@@ -62,16 +70,23 @@ st.markdown("""
             padding: 0.6em 1.5em;
             margin-top: 10px;
         }
+
+        /* Scrollable table */
+        .scroll-table {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
     </style>
 
     <div class="main-title">🍽️ Zomato Menu Scraper</div>
     <div class="subtitle">Paste any Zomato restaurant URL below to get its full menu instantly</div>
 """, unsafe_allow_html=True)
 
-# 📥 URL Input
-url = st.text_input("Enter Zomato restaurant URL", placeholder="https://www.zomato.com/...")
+# 📥 URL Input — wrapped with centered label
+st.markdown('<label for="zomato-url-input">Enter Zomato restaurant URL</label>', unsafe_allow_html=True)
+url = st.text_input("", placeholder="https://www.zomato.com/...", key="zomato-url-input")
 
-# 🚀 Center-aligned Scrape Button
+# 🚀 Scrape Menu button centered
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     if st.button("Scrape Menu"):
@@ -93,9 +108,12 @@ with col2:
                         columns = ["restaurant", "category", "sub_category", "item_name", "price", "desc", "dietary_slugs"]
                         df = df[columns]
 
+                        # Show scrollable table
+                        st.markdown('<div class="scroll-table">', unsafe_allow_html=True)
                         st.dataframe(df, use_container_width=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
 
-                        # Prepare CSV download
+                        # Prepare CSV
                         csv_buffer = io.StringIO()
                         df.to_csv(csv_buffer, index=False)
                         csv_data = csv_buffer.getvalue()
