@@ -5,7 +5,7 @@ from scraper import get_menu
 
 st.set_page_config(page_title="Zomato Menu Scraper", layout="wide")
 
-# 💅 Custom CSS and Title
+# 💅 Custom CSS and Title + input/button flex styling
 st.markdown("""
     <style>
         body {
@@ -33,14 +33,16 @@ st.markdown("""
             background-color: #ffffff;
             color: #000000 !important;
             border: 1px solid #ddd;
-            border-radius: 10px;
             padding: 10px;
+            border-radius: 10px 0 0 10px; /* rounded left corners */
+            border-right: none;
         }
 
         [data-theme="dark"] .stTextInput>div>div>input {
             background-color: #262730;
             color: #ffffff !important;
             border: 1px solid #444;
+            border-right: none;
         }
 
         input::placeholder {
@@ -57,24 +59,33 @@ st.markdown("""
             text-align: center;
             font-weight: bold;
             font-size: 1.1em;
+            margin-bottom: 5px;
         }
 
         .stButton>button {
             background-color: #ff4b4b;
             color: white;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 0 10px 10px 0; /* rounded right corners */
             padding: 0.6em 1.5em;
-            margin-top: 10px;
+            border-left: none;
+            cursor: pointer;
         }
 
-        /* Align scrape button below the input field */
-        .scrape-container {
+        /* Flex container for input and button */
+        .input-button-row {
             display: flex;
             justify-content: center;
+            gap: 0;
+            max-width: 700px;
+            margin: 0 auto 20px auto;
         }
 
-        /* Make table container wider */
+        .input-button-row > div {
+            flex: 1;
+        }
+
+        /* Wider scrollable table */
         .scroll-table {
             overflow-x: auto;
             white-space: nowrap;
@@ -86,13 +97,19 @@ st.markdown("""
     <div class="subtitle">Paste any Zomato restaurant URL below to get its full menu instantly</div>
 """, unsafe_allow_html=True)
 
-# 📥 Centered label and input
+# Label for input
 st.markdown('<label for="zomato-url-input">Enter Zomato restaurant URL</label>', unsafe_allow_html=True)
-url = st.text_input("", placeholder="https://www.zomato.com/...", key="zomato-url-input")
 
-# 🚀 Scrape Menu button aligned just below input box
-st.markdown('<div class="scrape-container">', unsafe_allow_html=True)
-scrape = st.button("Scrape Menu")
+# Input and button side by side
+st.markdown('<div class="input-button-row">', unsafe_allow_html=True)
+col1, col2 = st.columns([5, 1])
+
+with col1:
+    url = st.text_input("", placeholder="https://www.zomato.com/...", key="zomato-url-input", label_visibility="collapsed")
+
+with col2:
+    scrape = st.button("Scrape Menu")
+
 st.markdown('</div>', unsafe_allow_html=True)
 
 # 🚀 Scrape Logic
