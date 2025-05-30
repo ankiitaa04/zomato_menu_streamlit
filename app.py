@@ -43,7 +43,6 @@ st.markdown("""
             border: 1px solid #444;
         }
 
-        /* Placeholder styling */
         input::placeholder {
             color: #666 !important;
             opacity: 1 !important;
@@ -53,7 +52,6 @@ st.markdown("""
             color: #ccc !important;
         }
 
-        /* Center-align label */
         label[for="zomato-url-input"] {
             display: block;
             text-align: center;
@@ -61,7 +59,6 @@ st.markdown("""
             font-size: 1.1em;
         }
 
-        /* Button styling */
         .stButton>button {
             background-color: #ff4b4b;
             color: white;
@@ -71,58 +68,68 @@ st.markdown("""
             margin-top: 10px;
         }
 
-        /* Scrollable table */
+        /* Align scrape button below the input field */
+        .scrape-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Make table container wider */
         .scroll-table {
             overflow-x: auto;
             white-space: nowrap;
+            max-width: 100%;
         }
     </style>
 
-    <div class="main-title">🍽️ Zomato Menu Scraper</div>
+    <div class="main-title">🍽️ <strong>Zomato Menu Scraper</strong></div>
     <div class="subtitle">Paste any Zomato restaurant URL below to get its full menu instantly</div>
 """, unsafe_allow_html=True)
 
-# 📥 URL Input — wrapped with centered label
+# 📥 Centered label and input
 st.markdown('<label for="zomato-url-input">Enter Zomato restaurant URL</label>', unsafe_allow_html=True)
 url = st.text_input("", placeholder="https://www.zomato.com/...", key="zomato-url-input")
 
-# 🚀 Scrape Menu button centered
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    if st.button("Scrape Menu"):
-        if not url:
-            st.warning("Please enter a valid Zomato URL.")
-        elif "zomato.com" not in url.lower():
-            st.warning("Please enter a valid Zomato restaurant URL.")
-        else:
-            with st.spinner("Scraping menu..."):
-                try:
-                    data = get_menu(url, save=False)
-                    if not data:
-                        st.error("No menu found or scraping failed.")
-                    else:
-                        st.success(f"Scraped {len(data)} items! ✅")
+# 🚀 Scrape Menu button aligned just below input box
+st.markdown('<div class="scrape-container">', unsafe_allow_html=True)
+scrape = st.button("Scrape Menu")
+st.markdown('</div>', unsafe_allow_html=True)
 
-                        # Convert to DataFrame and order columns
-                        df = pd.DataFrame(data)
-                        columns = ["restaurant", "category", "sub_category", "item_name", "price", "desc", "dietary_slugs"]
-                        df = df[columns]
+# 🚀 Scrape Logic
+if scrape:
+    if not url:
+        st.warning("Please enter a valid Zomato URL.")
+    elif "zomato.com" not in url.lower():
+        st.warning("Please enter a valid Zomato restaurant URL.")
+    else:
+        with st.spinner("Scraping menu..."):
+            try:
+                data = get_menu(url, save=False)
+                if not data:
+                    st.error("No menu found or scraping failed.")
+                else:
+                    st.success(f"Scraped {len(data)} items! ✅")
 
-                        # Show scrollable table
-                        st.markdown('<div class="scroll-table">', unsafe_allow_html=True)
-                        st.dataframe(df, use_container_width=True)
-                        st.markdown('</div>', unsafe_allow_html=True)
+                    # Convert to DataFrame
+                    df = pd.DataFrame(data)
+                    columns = ["restaurant", "category", "sub_category", "item_name", "price", "desc", "dietary_slugs"]
+                    df = df[columns]
 
-                        # Prepare CSV
-                        csv_buffer = io.StringIO()
-                        df.to_csv(csv_buffer, index=False)
-                        csv_data = csv_buffer.getvalue()
+                    # Wider scrollable table
+                    st.markdown('<div class="scroll-table">', unsafe_allow_html=True)
+                    st.dataframe(df, use_container_width=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
 
-                        st.download_button(
-                            label="📥 Download CSV",
-                            data=csv_data,
-                            file_name="zomato_menu.csv",
-                            mime="text/csv"
-                        )
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                    # Download CSV
+                    csv_buffer = io.StringIO()
+                    df.to_csv(csv_buffer, index=False)
+                    csv_data = csv_buffer.getvalue()
+
+                    st.download_button(
+                        label="📥 Download CSV",
+                        data=csv_data,
+                        file_name="zomato_menu.csv",
+                        mime="text/csv"
+                    )
+            except Exception as e:
+                st.error(f"Error: {e}")
